@@ -10,6 +10,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.net.URL;
+import java.util.List;
 
 public class FirstTest {
     private AppiumDriver driver;
@@ -72,12 +73,32 @@ public class FirstTest {
     @Test
     public void testSearchSeveralArtAndCancel()
     {
-        //тут открываем поиск и ищем слово "Marvel", проверяем результат выдачи статей более одной. Закрываем и проверяем, что все закрылось:
+        //EX3 тут открываем поиск и ищем слово "Marvel", проверяем результат выдачи статей более одной. Закрываем и проверяем, что все закрылось:
         waitForElementAndClick(By.id("org.wikipedia:id/search_container"), "Cannot find search element", 5);
         waitForElementAndSendKeys(By.xpath("//*[contains(@text, 'Search…')]"),"Marvel","Cannot find search input",15);
         Assert.assertTrue("Few articles found", countOfElements(By.id("org.wikipedia:id/page_list_item_container"))>1);
         waitForElementAndClick(By.id("org.wikipedia:id/search_close_btn"), "Cannot find close cross element", 5);
         Assert.assertTrue("Articles still visible", countOfElements(By.id("org.wikipedia:id/page_list_item_container")) == 0);
+    }
+
+    @Test
+    public void testSearchResultsText()
+    {
+        //EX4 целимся в поиск, ищем Железного человека, проверяем что оно есть не одно в результатах, закрываем поиск.
+        String search_word="Iron Man";
+        waitForElementAndClick(By.id("org.wikipedia:id/search_container"), "Ойбой! Cannot find search element", 5);
+        waitForElementAndSendKeys(By.xpath("//*[contains(@text, 'Search…')]"),search_word,"Ойбой! Cannot find search input",5);
+        testTextSearchResults(By.id("org.wikipedia:id/page_list_item_title"),search_word,"Ойбой! Not all articles contains search text");
+    }
+
+    private void testTextSearchResults(By by, String text, String error_text)
+    {
+        List<WebElement> list = driver.findElements(by);
+        for(WebElement el : list)
+        {
+            System.out.println(el.getAttribute("text"));
+            Assert.assertTrue(error_text,el.getAttribute("text").contains(text));
+        }
     }
     private int countOfElements(By by)
     {
@@ -127,3 +148,4 @@ public class FirstTest {
         return waitForElementPresent(by, error_message, 5);
     }
 }
+
