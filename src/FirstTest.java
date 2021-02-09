@@ -16,6 +16,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import javax.swing.event.MenuListener;
 import java.net.URL;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class FirstTest {
     private AppiumDriver driver;
@@ -588,6 +589,38 @@ public class FirstTest {
 
     }
 
+    @Test
+    public void titleIsAvailable()
+    {
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
+                "Cannot find search Wikipedia input",
+                5
+        );
+
+        String search_line = "Java";
+        waitForElementAndSendKeys(
+                By.xpath("//*[contains(@text, 'Search…')]"),
+                search_line,
+                "Cannot find search input",
+                5
+        );
+
+        String search_first_result_locator = "//*[@resource-id='org.wikipedia:id/page_list_item_container']//*[@text='Object-oriented programming language']";
+        waitForElementAndClick(
+                By.xpath(search_first_result_locator),
+                "Cannot find anything by the request" + " " + search_line,
+                15
+        );
+
+        assertElementPresence(
+                By.id("org.wikipedia:id/view_page_title_text"),
+                "Title article not found"
+        );
+
+    }
+
+
     private WebElement waitForElementPresent(By by, String error_message, long timeoutInSeconds)
     {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
@@ -700,12 +733,27 @@ public class FirstTest {
             throw new AssertionError(default_message + " " + error_message);
         }
     }
+
     //Здесь берем заголовок, чтобы использовать его.
     private String waitForElementAndGetAttribute(By by,String attribute, String error_message, long timeoutInSeconds)
     {
         WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
         return element.getAttribute(attribute);
     }
+
+    //проверка наличия элемента, не ожидая его появления
+    private boolean assertElementPresence(By by, String error_message)
+    {
+        try{
+            driver.findElement(by);
+            return true;
+        }
+        catch(NoSuchElementException e){
+            throw new AssertionError(error_message);
+        }
+    }
+
 }
+
 
 
